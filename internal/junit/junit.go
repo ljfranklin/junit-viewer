@@ -37,6 +37,8 @@ type TestCase struct {
 	ErrorType      string
 	ErrorOutput    string
 	SkipMessage    string
+	SystemOut      string
+	SystemErr      string
 }
 
 type xmlTestSuite struct {
@@ -63,6 +65,8 @@ type xmlTestSuite struct {
 		Skipped struct {
 			Message string `xml:"message,attr"`
 		} `xml:"skipped"`
+		SystemOut string `xml:"system-out"`
+		SystemErr string `xml:"system-err"`
 	} `xml:"testcase"`
 }
 type xmlTestSuites struct {
@@ -115,6 +119,8 @@ func Load(xmlPath string) ([]TestSuite, error) {
 				ErrorType:      testCase.Error.Type,
 				ErrorOutput:    testCase.Error.Output,
 				SkipMessage:    testCase.Skipped.Message,
+				SystemOut:      testCase.SystemOut,
+				SystemErr:      testCase.SystemErr,
 			}
 			outputSuite.Tests++
 			if len(tc.FailureOutput) > 0 {

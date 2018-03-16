@@ -11,9 +11,6 @@ import (
 	"github.com/ljfranklin/junit-viewer/internal/test/helpers"
 )
 
-// TODO
-// - system-out, system-err
-
 func TestLoad(t *testing.T) {
 	t.Parallel()
 
@@ -145,6 +142,22 @@ func TestSkips(t *testing.T) {
 	helpers.AssertEquals(t, results[0].TestCases[1].Name, "TestS3CompatibleGet")
 	helpers.AssertEquals(t, results[0].TestCases[1].Skipped, true)
 	helpers.AssertEquals(t, results[0].TestCases[1].SkipMessage, "s3_test.go:110: Skipping this test")
+}
+
+func TestSystemOutErr(t *testing.T) {
+	t.Parallel()
+
+	results, err := junit.Load(fixturePath("system-out-err.xml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	helpers.AssertEquals(t, len(results), 1)
+
+	helpers.AssertEquals(t, len(results[0].TestCases), 1)
+	helpers.AssertEquals(t, results[0].TestCases[0].Name, "TestS3Get")
+	helpers.AssertEquals(t, results[0].TestCases[0].SystemOut, "some-stdout")
+	helpers.AssertEquals(t, results[0].TestCases[0].SystemErr, "some-stderr")
 }
 
 func TestErrorInvalidPath(t *testing.T) {

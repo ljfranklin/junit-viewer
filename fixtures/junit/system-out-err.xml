@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite tests="1" failures="0" time="9.837" name="github.com/ljfranklin/test-runner-resource/storage" timestamp="2018-03-15T14:22:46+07:00">
+		<testcase classname="storage" name="TestS3Get" time="2.560">
+			<system-out>some-stdout</system-out>
+			<system-err>some-stderr</system-err>
+		</testcase>
+	</testsuite>
+</testsuites>
