@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ljfranklin/junit-viewer/internal/junit"
+	"github.com/ljfranklin/junit-viewer"
 	"github.com/ljfranklin/junit-viewer/internal/test/helpers"
 )
 
@@ -185,5 +185,5 @@ func TestErrorInvalidXML(t *testing.T) {
 }
 
 func fixturePath(fixture string) string {
-	return filepath.Join("..", "..", "fixtures", "junit", fixture)
+	return filepath.Join("fixtures", fixture)
 }
