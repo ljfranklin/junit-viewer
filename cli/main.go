@@ -4,22 +4,28 @@ import (
 	"fmt"
 	"os"
 
+	junit "github.com/ljfranklin/junit-viewer"
 	"github.com/olekukonko/tablewriter"
 )
 
 func main() {
-	fmt.Printf("## Failures matching regex\n\n")
+	junitPath := os.Args[1]
+	results, err := junit.Load(junitPath)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("## Summary\n\n")
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Matches", "Regex", "Last Failure"})
+	table.SetHeader([]string{"Tests", "Passed", "Failed", "Skipped"})
 
-	// RFC822Z
-	data := [][]string{
-		[]string{"10", `\w502\w`, "2006-01-02T15:04:05Z07:00"},
-		[]string{"3", `InsufficientResources`, "2006-01-02T15:04:05Z07:00"},
-	}
-	for _, v := range data {
-		table.Append(v)
+	for _, suite := range results {
+		table.Append([]string{
+			fmt.Sprintf("%d", suite.Tests),
+			fmt.Sprintf("%d", suite.Successes),
+			fmt.Sprintf("%d", suite.Failures),
+			fmt.Sprintf("%d", suite.Skips),
+		})
 	}
 
 	// markdown table
