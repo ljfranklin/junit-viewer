@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite tests="2" failures="0" time="0.003" name="github.com/ljfranklin/test-runner-resource/storage">
+		<properties>
+			<property name="go.version" value="go1.9.2"></property>
+		</properties>
+		<testcase classname="storage" name="TestS3Get" time="0.000">
+			<skipped message="s3_test.go:101: Skipping this test"></skipped>
+		</testcase>
+		<testcase classname="storage" name="TestS3CompatibleGet" time="0.000">
+			<skipped message="s3_test.go:110: Skipping this test"></skipped>
+		</testcase>
+	</testsuite>
+</testsuites>

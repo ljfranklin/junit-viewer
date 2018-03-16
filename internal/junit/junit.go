@@ -2,6 +2,7 @@ package junit
 
 import (
 	"encoding/xml"
+	"fmt"
 	"os"
 	"time"
 )
@@ -14,6 +15,8 @@ type TestSuite struct {
 	Tests      int
 	Successes  int
 	Failures   int
+	Errors     int
+	Skips      int
 	Time       float64
 	Timestamp  time.Time
 	Properties map[string]string
@@ -21,40 +24,66 @@ type TestSuite struct {
 }
 
 type TestCase struct {
-	Name string
-	Time float64
+	Name           string
+	Time           float64
+	Passed         bool
+	Failed         bool
+	Errored        bool
+	Skipped        bool
+	FailureMessage string
+	FailureType    string
+	FailureOutput  string
+	ErrorMessage   string
+	ErrorType      string
+	ErrorOutput    string
+	SkipMessage    string
+}
+
+type xmlTestSuite struct {
+	XMLName    xml.Name `xml:"testsuite"`
+	Time       float64  `xml:"time,attr"`
+	Timestamp  string   `xml:"timestamp,attr"`
+	Properties []struct {
+		Name  string `xml:"name,attr"`
+		Value string `xml:"value,attr"`
+	} `xml:"properties>property"`
+	TestCases []struct {
+		Name    string  `xml:"name,attr"`
+		Time    float64 `xml:"time,attr"`
+		Failure struct {
+			Message string `xml:"message,attr"`
+			Type    string `xml:"type,attr"`
+			Output  string `xml:",innerxml"`
+		} `xml:"failure"`
+		Error struct {
+			Message string `xml:"message,attr"`
+			Type    string `xml:"type,attr"`
+			Output  string `xml:",innerxml"`
+		} `xml:"error"`
+		Skipped struct {
+			Message string `xml:"message,attr"`
+		} `xml:"skipped"`
+	} `xml:"testcase"`
+}
+type xmlTestSuites struct {
+	XMLName    xml.Name       `xml:"testsuites"`
+	TestSuites []xmlTestSuite `xml:"testsuite"`
 }
 
 func Load(xmlPath string) ([]TestSuite, error) {
-	xmlInput := struct {
-		XMLName    xml.Name `xml:"testsuites"`
-		TestSuites []struct {
-			Tests      int     `xml:"tests,attr"`
-			Failures   int     `xml:"failures,attr"`
-			Time       float64 `xml:"time,attr"`
-			Timestamp  string  `xml:"timestamp,attr"`
-			Properties []struct {
-				Property struct {
-					Name  string `xml:"name,attr"`
-					Value string `xml:"value,attr"`
-				} `xml:"property"`
-			} `xml:"properties"`
-			TestCases []struct {
-				XMLName xml.Name `xml:"testcase"`
-				Name    string   `xml:"name,attr"`
-				Time    float64  `xml:"time,attr"`
-			} `xml:"testcase"`
-		} `xml:"testsuite"`
-	}{}
+	xmlInput := xmlTestSuites{}
 
-	input, err := os.Open(xmlPath)
+	err := unmarshalXML(xmlPath, &xmlInput)
 	if err != nil {
-		panic(err)
-	}
-	decoder := xml.NewDecoder(input)
-	err = decoder.Decode(&xmlInput)
-	if err != nil {
-		panic(err)
+		// some junit output is missing the root `testsuites` element
+		singleTestSuiteInput := xmlTestSuite{}
+		err = unmarshalXML(xmlPath, &singleTestSuiteInput)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse XML in '%s': %s", xmlPath, err)
+		}
+		xmlInput = xmlTestSuites{
+			TestSuites: []xmlTestSuite{singleTestSuiteInput},
+		}
 	}
 
 	output := []TestSuite{}
@@ -67,25 +96,52 @@ func Load(xmlPath string) ([]TestSuite, error) {
 			}
 		}
 		outputSuite := TestSuite{
-			Tests:      inputSuite.Tests,
-			Successes:  inputSuite.Tests - inputSuite.Failures,
-			Failures:   inputSuite.Failures,
 			Time:       inputSuite.Time,
 			Timestamp:  timestamp,
 			Properties: map[string]string{},
 			TestCases:  []TestCase{},
 		}
 		for _, prop := range inputSuite.Properties {
-			outputSuite.Properties[prop.Property.Name] = prop.Property.Value
+			outputSuite.Properties[prop.Name] = prop.Value
 		}
 		for _, testCase := range inputSuite.TestCases {
-			outputSuite.TestCases = append(outputSuite.TestCases, TestCase{
-				Name: testCase.Name,
-				Time: testCase.Time,
-			})
+			tc := TestCase{
+				Name:           testCase.Name,
+				Time:           testCase.Time,
+				FailureMessage: testCase.Failure.Message,
+				FailureType:    testCase.Failure.Type,
+				FailureOutput:  testCase.Failure.Output,
+				ErrorMessage:   testCase.Error.Message,
+				ErrorType:      testCase.Error.Type,
+				ErrorOutput:    testCase.Error.Output,
+				SkipMessage:    testCase.Skipped.Message,
+			}
+			outputSuite.Tests++
+			if len(tc.FailureOutput) > 0 {
+				tc.Failed = true
+				outputSuite.Failures++
+			} else if len(tc.ErrorOutput) > 0 {
+				tc.Errored = true
+				outputSuite.Errors++
+			} else if len(tc.SkipMessage) > 0 {
+				tc.Skipped = true
+				outputSuite.Skips++
+			} else {
+				tc.Passed = true
+				outputSuite.Successes++
+			}
+			outputSuite.TestCases = append(outputSuite.TestCases, tc)
 		}
 		output = append(output, outputSuite)
 	}
 
 	return output, nil
+}
+
+func unmarshalXML(xmlPath string, obj interface{}) error {
+	input, err := os.Open(xmlPath)
+	if err != nil {
+		return fmt.Errorf("failed to open '%s': %s", xmlPath, err)
+	}
+	return xml.NewDecoder(input).Decode(&obj)
 }

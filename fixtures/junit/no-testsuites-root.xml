@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite tests="2" failures="0" time="9.837" name="github.com/ljfranklin/test-runner-resource/storage" timestamp="2018-03-15T14:22:46+07:00">
+	<properties>
+		<property name="go.version" value="go1.9.2"></property>
+	</properties>
+	<testcase classname="storage" name="TestS3Get" time="2.560"></testcase>
+	<testcase classname="storage" name="TestS3CompatibleGet" time="1.860"></testcase>
+</testsuite>
