@@ -3,7 +3,7 @@ package junit
 import (
 	"encoding/xml"
 	"fmt"
-	"os"
+	"io/ioutil"
 	"time"
 )
 
@@ -74,16 +74,24 @@ type xmlTestSuites struct {
 	TestSuites []xmlTestSuite `xml:"testsuite"`
 }
 
-func Load(xmlPath string) ([]TestSuite, error) {
+func LoadFile(xmlPath string) ([]TestSuite, error) {
+	xmlContents, err := ioutil.ReadFile(xmlPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open '%s': %s", xmlPath, err)
+	}
+	return Load(xmlContents)
+}
+
+func Load(xmlContents []byte) ([]TestSuite, error) {
 	xmlInput := xmlTestSuites{}
 
-	err := unmarshalXML(xmlPath, &xmlInput)
+	err := xml.Unmarshal(xmlContents, &xmlInput)
 	if err != nil {
 		// some junit output is missing the root `testsuites` element
 		singleTestSuiteInput := xmlTestSuite{}
-		err = unmarshalXML(xmlPath, &singleTestSuiteInput)
+		err = xml.Unmarshal(xmlContents, &singleTestSuiteInput)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse XML in '%s': %s", xmlPath, err)
+			return nil, fmt.Errorf("failed to parse XML: %s", err)
 		}
 		xmlInput = xmlTestSuites{
 			TestSuites: []xmlTestSuite{singleTestSuiteInput},
@@ -142,12 +150,4 @@ func Load(xmlPath string) ([]TestSuite, error) {
 	}
 
 	return output, nil
-}
-
-func unmarshalXML(xmlPath string, obj interface{}) error {
-	input, err := os.Open(xmlPath)
-	if err != nil {
-		return fmt.Errorf("failed to open '%s': %s", xmlPath, err)
-	}
-	return xml.NewDecoder(input).Decode(&obj)
 }

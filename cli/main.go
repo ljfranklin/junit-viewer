@@ -10,7 +10,7 @@ import (
 
 func main() {
 	junitPath := os.Args[1]
-	results, err := junit.Load(junitPath)
+	results, err := junit.LoadFile(junitPath)
 	if err != nil {
 		panic(err)
 	}

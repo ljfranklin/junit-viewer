@@ -2,6 +2,7 @@ package junit_test
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -14,7 +15,7 @@ import (
 func TestLoad(t *testing.T) {
 	t.Parallel()
 
-	results, err := junit.Load(fixturePath("success.xml"))
+	results, err := junit.Load(fixtureContents(t, "success.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +49,7 @@ func TestLoad(t *testing.T) {
 func TestNoTestSuitesRoot(t *testing.T) {
 	t.Parallel()
 
-	results, err := junit.Load(fixturePath("no-testsuites-root.xml"))
+	results, err := junit.Load(fixtureContents(t, "no-testsuites-root.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +61,7 @@ func TestNoTestSuitesRoot(t *testing.T) {
 func TestFailureMessages(t *testing.T) {
 	t.Parallel()
 
-	results, err := junit.Load(fixturePath("failures.xml"))
+	results, err := junit.Load(fixtureContents(t, "failures.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +92,7 @@ func TestFailureMessages(t *testing.T) {
 func TestErrorMessages(t *testing.T) {
 	t.Parallel()
 
-	results, err := junit.Load(fixturePath("errors.xml"))
+	results, err := junit.Load(fixtureContents(t, "errors.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,7 @@ func TestErrorMessages(t *testing.T) {
 func TestSkips(t *testing.T) {
 	t.Parallel()
 
-	results, err := junit.Load(fixturePath("skips.xml"))
+	results, err := junit.Load(fixtureContents(t, "skips.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +148,7 @@ func TestSkips(t *testing.T) {
 func TestSystemOutErr(t *testing.T) {
 	t.Parallel()
 
-	results, err := junit.Load(fixturePath("system-out-err.xml"))
+	results, err := junit.Load(fixtureContents(t, "system-out-err.xml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,28 +161,46 @@ func TestSystemOutErr(t *testing.T) {
 	helpers.AssertEquals(t, results[0].TestCases[0].SystemErr, "some-stderr")
 }
 
-func TestErrorInvalidPath(t *testing.T) {
-	t.Parallel()
-
-	_, err := junit.Load("some-invalid-path")
-	if err == nil {
-		t.Fatal("expected Load to fail but it succeeded")
-	}
-	if !strings.Contains(err.Error(), "some-invalid-path") {
-		t.Fatalf("expected '%s' to contain 'some-invalid-path', but it did not", err.Error())
-	}
-}
-
 func TestErrorInvalidXML(t *testing.T) {
 	t.Parallel()
 
-	_, err := junit.Load(fixturePath("malformed.xml"))
+	_, err := junit.Load(fixtureContents(t, "malformed.xml"))
 	if err == nil {
 		t.Fatal("expected Load to fail but it succeeded")
 	}
 	if !strings.Contains(err.Error(), "parse XML") {
 		t.Fatalf("expected '%s' to contain 'parse XML', but it did not", err.Error())
 	}
+}
+
+func TestLoadFile(t *testing.T) {
+	t.Parallel()
+
+	results, err := junit.LoadFile(fixturePath("success.xml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	helpers.AssertEquals(t, len(results), 1)
+	helpers.AssertEquals(t, results[0].Tests, 2)
+	helpers.AssertEquals(t, results[0].Successes, 2)
+}
+
+func TestLoadFileErrorInvalidPath(t *testing.T) {
+	t.Parallel()
+
+	_, err := junit.LoadFile("some-invalid-path")
+	if err == nil {
+		t.Fatal("expected LoadFile to fail but it succeeded")
+	}
+}
+
+func fixtureContents(t *testing.T, fixture string) []byte {
+	contents, err := ioutil.ReadFile(fixturePath(fixture))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return contents
 }
 
 func fixturePath(fixture string) string {
