@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/mattn/go-runewidth"
   packages = ["."]
   revision = "9e777a8366cce605130a531d2cd6363d07ad7317"
@@ -13,9 +19,21 @@
   packages = ["."]
   revision = "b8a9be070da40449e501c3c4730a889e42d87a9e"
 
+[[projects]]
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  revision = "7b2c5ac9fc04fc5efafb60700713d4fa609b777b"
+  version = "v0.0.1"
+
+[[projects]]
+  name = "github.com/spf13/pflag"
+  packages = ["."]
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "490bb6e272734bbcb83566c4ae448458c56fbe46bde647ab6798c65d0bee938e"
+  inputs-digest = "bb5541b9ac764ab2419e58a7ea34bd01e1d4763e272ca7cbe3c6051cd8f64123"
   solver-name = "gps-cdcl"
   solver-version = 1

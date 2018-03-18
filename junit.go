@@ -4,12 +4,21 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"time"
 )
 
 const (
 	TimeFormat = time.RFC3339
 )
+
+type TestSuites []TestSuite
+
+func (t TestSuites) SortByTimestamp() {
+	sort.Slice(t, func(i, j int) bool {
+		return t[i].Timestamp.After(t[j].Timestamp)
+	})
+}
 
 type TestSuite struct {
 	Tests      int
@@ -74,7 +83,7 @@ type xmlTestSuites struct {
 	TestSuites []xmlTestSuite `xml:"testsuite"`
 }
 
-func LoadFile(xmlPath string) ([]TestSuite, error) {
+func LoadFile(xmlPath string) (TestSuites, error) {
 	xmlContents, err := ioutil.ReadFile(xmlPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open '%s': %s", xmlPath, err)
@@ -82,7 +91,7 @@ func LoadFile(xmlPath string) ([]TestSuite, error) {
 	return Load(xmlContents)
 }
 
-func Load(xmlContents []byte) ([]TestSuite, error) {
+func Load(xmlContents []byte) (TestSuites, error) {
 	xmlInput := xmlTestSuites{}
 
 	err := xml.Unmarshal(xmlContents, &xmlInput)

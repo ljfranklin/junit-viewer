@@ -186,6 +186,33 @@ func TestLoadFile(t *testing.T) {
 	helpers.AssertEquals(t, results[0].Successes, 2)
 }
 
+func TestSortByTimestamp(t *testing.T) {
+	results, err := junit.LoadFile(fixturePath("failures.xml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	moreResults, err := junit.LoadFile(fixturePath("success.xml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	results = append(results, moreResults...)
+
+	results.SortByTimestamp()
+
+	helpers.AssertEquals(t, len(results), 2)
+	expectedTime, err := time.Parse(junit.TimeFormat, "2018-03-15T14:22:46+07:00")
+	if err != nil {
+		t.Fatal(err)
+	}
+	helpers.AssertEquals(t, results[0].Timestamp, expectedTime)
+	expectedTime, err = time.Parse(junit.TimeFormat, "2018-03-14T10:12:34+07:00")
+	if err != nil {
+		t.Fatal(err)
+	}
+	helpers.AssertEquals(t, results[1].Timestamp, expectedTime)
+}
+
 func TestLoadFileErrorInvalidPath(t *testing.T) {
 	t.Parallel()
 
