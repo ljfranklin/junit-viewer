@@ -50,6 +50,24 @@ func TestPassFail(t *testing.T) {
 `)
 }
 
+func TestPassFailMissingTimestamp(t *testing.T) {
+	t.Parallel()
+
+	missingTimestampPath := filepath.Join(projectRoot(), "fixtures/missing-timestamp.xml")
+	cmd := exec.Command(mainPath, "--output-type", "pass-fail", missingTimestampPath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("cmd failed: %s, %s", err, string(output))
+	}
+
+	helpers.AssertEquals(t, string(output), `## Summary of last 1 run(s)
+
+| TESTS |  PASSED   |  FAILED   | SKIPPED  | TIME  |  WHEN   |
+|-------|-----------|-----------|----------|-------|---------|
+|     3 | 2 (66.7%) | 1 (33.3%) | 0 (0.0%) | 2.253 | Unknown |
+`)
+}
+
 func TestFrequentFailures(t *testing.T) {
 	t.Parallel()
 
@@ -68,6 +86,24 @@ func TestFrequentFailures(t *testing.T) {
 |---------------------|-----------|---------------------------|---------------------------|
 | TestS3Get           | 2 (66.7%) | 2018-03-14T10:12:34+07:00 | 2018-03-15T14:22:46+07:00 |
 | TestS3CompatibleGet | 1 (33.3%) | 2018-03-14T10:12:34+07:00 | 2018-03-15T14:22:46+07:00 |
+`)
+}
+
+func TestFrequentFailuresMissingTimestamp(t *testing.T) {
+	t.Parallel()
+
+	missingTimestampPath := filepath.Join(projectRoot(), "fixtures/missing-timestamp.xml")
+	cmd := exec.Command(mainPath, "--output-type", "frequent-failures", missingTimestampPath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("cmd failed: %s, %s", err, string(output))
+	}
+
+	helpers.AssertEquals(t, string(output), `## Most frequent failures in last 1 run(s)
+
+|   TEST    |   FAILED   | LAST FAILED | LAST RAN |
+|-----------|------------|-------------|----------|
+| TestS3Get | 1 (100.0%) | Unknown     | Unknown  |
 `)
 }
 

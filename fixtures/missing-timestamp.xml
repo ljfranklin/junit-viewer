@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite tests="3" failures="1" time="2.253" name="github.com/ljfranklin/test-runner-resource/storage">
+		<properties>
+			<property name="go.version" value="go1.9.2"></property>
+		</properties>
+		<testcase classname="storage" name="TestS3Get" time="0.000">
+			<failure message="Failed" type="integration">s3_test.go:102: AWS_ACCESS_KEY must be set</failure>
+		</testcase>
+		<testcase classname="storage" name="TestS3CompatibleGet" time="1.860"></testcase>
+		<testcase classname="storage" name="TestS3Put" time="2.131"></testcase>
+	</testsuite>
+</testsuites>

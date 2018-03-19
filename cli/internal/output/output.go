@@ -15,13 +15,21 @@ func PrintPassFail(results junit.TestSuites, table *tablewriter.Table) {
 	table.SetHeader([]string{"Tests", "Passed", "Failed", "Skipped", "Time", "When"})
 
 	for _, suite := range results {
+		var (
+			lastRan string
+		)
+		if suite.Timestamp == (time.Time{}) {
+			lastRan = "Unknown"
+		} else {
+			lastRan = suite.Timestamp.Format(junit.TimeFormat)
+		}
 		table.Append([]string{
 			fmt.Sprintf("%d", suite.Tests),
 			fmt.Sprintf("%d (%.1f%%)", suite.Successes, (float64(suite.Successes)/float64(suite.Tests))*100),
 			fmt.Sprintf("%d (%.1f%%)", suite.Failures, (float64(suite.Failures)/float64(suite.Tests))*100),
 			fmt.Sprintf("%d (%.1f%%)", suite.Skips, (float64(suite.Skips)/float64(suite.Tests))*100),
 			fmt.Sprintf("%.3f", suite.Time),
-			fmt.Sprintf("%s", suite.Timestamp.Format(junit.TimeFormat)),
+			lastRan,
 		})
 	}
 }
@@ -74,11 +82,25 @@ func PrintFrequentFailures(results junit.TestSuites, table *tablewriter.Table) {
 	table.SetHeader([]string{"Test", "Failed", "Last Failed", "Last Ran"})
 
 	for _, tc := range outputList {
+		var (
+			lastRan    string
+			lastFailed string
+		)
+		if tc.LastRan == (time.Time{}) {
+			lastRan = "Unknown"
+		} else {
+			lastRan = tc.LastRan.Format(junit.TimeFormat)
+		}
+		if tc.LastFailed == (time.Time{}) {
+			lastFailed = "Unknown"
+		} else {
+			lastFailed = tc.LastFailed.Format(junit.TimeFormat)
+		}
 		table.Append([]string{
 			tc.TestCase.Name,
 			fmt.Sprintf("%d (%.1f%%)", tc.FailureCount, (float64(tc.FailureCount)/float64(tc.TotalCount))*100),
-			tc.LastFailed.Format(junit.TimeFormat),
-			tc.LastRan.Format(junit.TimeFormat),
+			lastFailed,
+			lastRan,
 		})
 	}
 }
