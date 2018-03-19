@@ -49,6 +49,27 @@ func TestPassFail(t *testing.T) {
 `)
 }
 
+func TestFrequentFailures(t *testing.T) {
+	t.Parallel()
+
+	successPath := filepath.Join(projectRoot(), "fixtures/success.xml")
+	failurePath := filepath.Join(projectRoot(), "fixtures/failures.xml")
+	mixedPath := filepath.Join(projectRoot(), "fixtures/mixed-results.xml")
+	cmd := exec.Command(mainPath, "--output-type", "frequent-failures", successPath, failurePath, mixedPath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("cmd failed: %s, %s", err, string(output))
+	}
+
+	helpers.AssertEquals(t, string(output), `## Most frequent failures in last 3 run(s)
+
+|        TEST         |  FAILED   |        LAST FAILED        |         LAST RAN          |
+|---------------------|-----------|---------------------------|---------------------------|
+| TestS3Get           | 2 (66.7%) | 2018-03-14T10:12:34+07:00 | 2018-03-15T14:22:46+07:00 |
+| TestS3CompatibleGet | 1 (33.3%) | 2018-03-14T10:12:34+07:00 | 2018-03-15T14:22:46+07:00 |
+`)
+}
+
 func buildMain(tmpDir string) string {
 	mainPath := filepath.Join(tmpDir, "viewer")
 	cmd := exec.Command("go", "build", "-o", mainPath, "github.com/ljfranklin/junit-viewer/cli")

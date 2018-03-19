@@ -30,20 +30,13 @@ func main() {
 			}
 			results.SortByTimestamp()
 
-			fmt.Printf("## Summary of last %d run(s)\n\n", len(results))
-
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Tests", "Passed", "Failed", "Skipped", "Time", "When"})
 
-			for _, suite := range results {
-				table.Append([]string{
-					fmt.Sprintf("%d", suite.Tests),
-					fmt.Sprintf("%d (%.1f%%)", suite.Successes, (float64(suite.Successes)/float64(suite.Tests))*100),
-					fmt.Sprintf("%d (%.1f%%)", suite.Failures, (float64(suite.Failures)/float64(suite.Tests))*100),
-					fmt.Sprintf("%d (%.1f%%)", suite.Skips, (float64(suite.Skips)/float64(suite.Tests))*100),
-					fmt.Sprintf("%.3f", suite.Time),
-					fmt.Sprintf("%s", suite.Timestamp.Format(junit.TimeFormat)),
-				})
+			switch outputType {
+			case "pass-fail":
+				printPassFail(results, table)
+			case "frequent-failures":
+				printFrequentFailures(results, table)
 			}
 
 			// markdown table
