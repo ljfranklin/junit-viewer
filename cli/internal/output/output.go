@@ -1,4 +1,4 @@
-package main
+package output
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func printPassFail(results junit.TestSuites, table *tablewriter.Table) {
+func PrintPassFail(results junit.TestSuites, table *tablewriter.Table) {
 	fmt.Printf("## Summary of last %d run(s)\n\n", len(results))
 
 	table.SetHeader([]string{"Tests", "Passed", "Failed", "Skipped", "Time", "When"})
@@ -34,7 +34,7 @@ type testWithCount struct {
 	LastFailed   time.Time
 }
 
-func printFrequentFailures(results junit.TestSuites, table *tablewriter.Table) {
+func PrintFrequentFailures(results junit.TestSuites, table *tablewriter.Table) {
 	testCounts := map[string]*testWithCount{}
 	for _, ts := range results {
 		for _, tc := range ts.TestCases {

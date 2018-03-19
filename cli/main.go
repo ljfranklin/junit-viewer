@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	junit "github.com/ljfranklin/junit-viewer"
+	"github.com/ljfranklin/junit-viewer/cli/internal/output"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -15,16 +17,16 @@ func main() {
 	)
 
 	rootCmd := &cobra.Command{
-		Use:   "junit-viewer",
-		Short: "TODO",
-		Long:  "TODO",
-		// TODO: verify at least one arg
+		Use:   "junit-viewer junit-xml-files...",
+		Short: "View summary of JUnit XML files",
+		Long:  "",
+		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			results := junit.TestSuites{}
 			for _, inputFile := range args {
 				result, err := junit.LoadFile(inputFile)
 				if err != nil {
-					panic(err)
+					log.Fatal(err)
 				}
 				results = append(results, result...)
 			}
@@ -34,9 +36,11 @@ func main() {
 
 			switch outputType {
 			case "pass-fail":
-				printPassFail(results, table)
+				output.PrintPassFail(results, table)
 			case "frequent-failures":
-				printFrequentFailures(results, table)
+				output.PrintFrequentFailures(results, table)
+			default:
+				log.Fatalf("unknown output-type '%s'", outputType)
 			}
 
 			// markdown table
@@ -46,8 +50,8 @@ func main() {
 			table.Render()
 		},
 	}
-	rootCmd.PersistentFlags().StringVarP(&outputType, "output-type", "o", "", "TODO")
-	rootCmd.MarkFlagRequired("output-type")
+	rootCmd.PersistentFlags().StringVarP(&outputType, "output-type", "o", "", "(required) how results are presented; supports: 'pass-fail', 'frequent-failures'")
+	rootCmd.MarkPersistentFlagRequired("output-type")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
