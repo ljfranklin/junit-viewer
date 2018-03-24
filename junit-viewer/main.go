@@ -6,7 +6,7 @@ import (
 	"os"
 
 	junit "github.com/ljfranklin/junit-viewer"
-	"github.com/ljfranklin/junit-viewer/cli/internal/output"
+	"github.com/ljfranklin/junit-viewer/junit-viewer/internal/output"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )

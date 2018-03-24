@@ -149,7 +149,7 @@ func TestErrorMissingFile(t *testing.T) {
 
 func buildMain(tmpDir string) string {
 	mainPath := filepath.Join(tmpDir, "viewer")
-	cmd := exec.Command("go", "build", "-o", mainPath, "github.com/ljfranklin/junit-viewer/cli")
+	cmd := exec.Command("go", "build", "-o", mainPath, "github.com/ljfranklin/junit-viewer/junit-viewer")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		panic(fmt.Sprintf("failed to build main.go: %s, %s", err, string(output)))
