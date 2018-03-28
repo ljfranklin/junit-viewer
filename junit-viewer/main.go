@@ -14,6 +14,7 @@ import (
 func main() {
 	var (
 		outputType string
+		limit      int
 	)
 
 	rootCmd := &cobra.Command{
@@ -31,6 +32,9 @@ func main() {
 				results = append(results, result...)
 			}
 			results.SortByTimestamp()
+			if limit > 0 && len(results) > limit {
+				results = results[:limit]
+			}
 
 			table := tablewriter.NewWriter(os.Stdout)
 
@@ -51,7 +55,12 @@ func main() {
 		},
 	}
 	rootCmd.PersistentFlags().StringVarP(&outputType, "output-type", "o", "", "(required) how results are presented; supports: 'pass-fail', 'frequent-failures'")
-	rootCmd.MarkPersistentFlagRequired("output-type")
+	if err := rootCmd.MarkPersistentFlagRequired("output-type"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	rootCmd.PersistentFlags().IntVarP(&limit, "limit", "l", 0, "(optional) print the summary of the most recent X test suites")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

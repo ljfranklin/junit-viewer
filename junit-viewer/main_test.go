@@ -107,6 +107,25 @@ func TestFrequentFailuresMissingTimestamp(t *testing.T) {
 `)
 }
 
+func TestLimit(t *testing.T) {
+	t.Parallel()
+
+	successPath := filepath.Join(projectRoot(), "fixtures/success.xml")
+	failurePath := filepath.Join(projectRoot(), "fixtures/failures.xml")
+	cmd := exec.Command(mainPath, "--limit", "1", "--output-type", "pass-fail", successPath, failurePath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("cmd failed: %s, %s", err, string(output))
+	}
+
+	helpers.AssertEquals(t, string(output), `## Summary of last 1 run(s)
+
+| TESTS |   PASSED   |  FAILED  | SKIPPED  | TIME  |           WHEN            |
+|-------|------------|----------|----------|-------|---------------------------|
+|     2 | 2 (100.0%) | 0 (0.0%) | 0 (0.0%) | 9.837 | 2018-03-15T14:22:46+07:00 |
+`)
+}
+
 func TestErrorMissingPositionalArgs(t *testing.T) {
 	t.Parallel()
 
